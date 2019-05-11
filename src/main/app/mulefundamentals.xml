@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd">
+    <http:listener-config name="HTTP_Listener_Configuration" host="localhost" port="8081" doc:name="HTTP Listener Configuration"/>
+    <flow name="mulefundamentalsFlow">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/getMessage" allowedMethods="GET" doc:name="HTTP"/>
+        <expression-filter expression="#[message.payload!='favicon.ico']" doc:name="Expression"/>
+        <set-variable variableName="language" value="#[message.inboundProperties.'http.query.params'.language]" doc:name="Set Language Variable"/>
+        <choice doc:name="Choice">
+            <when expression="#[flowVars.language=='french']">
+                <set-payload value="french language reply" doc:name="Reply in French"/>
+            </when>
+            <when expression="#[flowVars.language=='spanish']">
+                <set-payload value="Reply in spanish language" doc:name="Reply in Spanish"/>
+            </when>
+            <otherwise>
+                <set-variable variableName="language" value="in default language" doc:name="Default Variable"/>
+                <set-payload value="Reply in English" doc:name="Default Reply"/>
+            </otherwise>
+        </choice>
+        <logger message="#[message.payload] for selecting #[flowVars.language]" level="INFO" doc:name="Logger"/>
+    </flow>
+</mule>
